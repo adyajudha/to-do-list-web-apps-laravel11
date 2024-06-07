@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Todo;
 
 use App\Http\Controllers\Controller;
+use App\Models\Todo;
 use Illuminate\Http\Request;
 
 class TodoController extends Controller
@@ -12,7 +13,8 @@ class TodoController extends Controller
      */
     public function index()
     {
-        return view("todo.app");
+        $data = Todo::orderBy('task', 'asc')->get();
+        return view("todo.app", compact('data'));
     }
 
     /**
@@ -28,7 +30,20 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request);
+        $request->validate([
+            'task' => 'required|min:3|max:25'
+        ], [
+            'task.required' => 'Isikan task wajib diisikan',
+            'task.min' => 'Isian task minimal 3 karakter',
+            'task.max' => 'Isian task maksimal 25 karakter'
+        ]);
+
+        $data = [
+            'task' => $request->input('task')
+        ];
+
+        Todo::create($data);
+        return redirect()->route('todo')->with('success', 'Berhasil menambahkan data');
     }
 
     /**
@@ -52,7 +67,21 @@ class TodoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'task' => 'required|min:3|max:25'
+        ], [
+            'task.required' => 'Isikan task wajib diisikan',
+            'task.min' => 'Isian task minimal 3 karakter',
+            'task.max' => 'Isian task maksimal 25 karakter'
+        ]);
+
+        $data = [
+            'task' => $request->input('task'),
+            'is_done' => $request->input('is_done')
+        ];
+
+        Todo::where('id', $id)->update($data);
+        return redirect()->route('todo')->with('success', 'Berhasil menyimpan perubahan data');
     }
 
     /**
